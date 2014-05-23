@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace必须指向Dao接口 -->
+
+
+<mapper namespace="com.frame.common.test.business.workflow.dao.IExStudentDao">
+	<resultMap id="ExStudentResult" type="ExStudent">
+		<result property="stuId" column="stu_id_" />
+		<result property="name" column="name_" />
+		<result property="birthday" column="birthday_" />
+		<result property="sex" column="sex_" />
+		<result property="desc" column="desc_" />
+	</resultMap>
+	<select id="selectAllExStudent" resultMap="ExStudentResult">
+		SELECT * FROM
+		ex_student
+	</select>
+
+	<!-- 用于select查询公用抽取的列 -->
+	<sql id="ExStudent_columns">
+	    <![CDATA[
+        stu_id_ ,name_ ,birthday_ ,sex_ ,desc_ 
+	    ]]>
+	</sql>
+	
+	<sql id="ExStudent_columns_as">
+	    <![CDATA[
+        stu_id_ as stuId,name_ as name,birthday_ as birthday,sex_ as sex,desc_ as desc
+	    ]]>
+	</sql>
+
+	<insert id="insert_ExStudent" parameterType="ExStudent">
+    <![CDATA[
+        INSERT INTO ex_student (
+        	stu_id_ ,
+        	name_ ,
+        	birthday_ ,
+        	sex_ ,
+        	desc_ 
+        ) VALUES (
+        	#{stuId,jdbcType=VARCHAR} ,
+        	#{name,jdbcType=VARCHAR} ,
+        	#{birthday,jdbcType=TIMESTAMP} ,
+        	#{sex,jdbcType=SMALLINT} ,
+        	#{desc,jdbcType=LONGVARCHAR} 
+        )
+    ]]>
+	</insert>
+	
+  <select id="getNextID" resultType="java.lang.String" >
+	select nextval for SEQ_ex_student from sysibm.sysdummy1
+  </select>
+	  
+	<update id="updateById_ExStudent" parameterType="ExStudent">
+        UPDATE ex_student 
+        <set>
+	        <if test="name != null">
+	        	name_ = #{name} ,
+			</if>
+	        <if test="birthday != null">
+	        	birthday_ = #{birthday} ,
+			</if>
+	        <if test="sex != null">
+	        	sex_ = #{sex} ,
+			</if>
+	        <if test="desc != null">
+	        	desc_ = #{desc} 
+			</if>
+	        
+	    </set>
+        WHERE 
+	        stu_id_ = #{stuId} 
+	</update>
+
+	<delete id="deleteById_ExStudent">
+    <![CDATA[
+        DELETE FROM ex_student WHERE
+        stu_id_ = #{stuId} 
+    ]]>
+	</delete>
+	
+	<delete id="deleteByObj_ExStudent">
+    <![CDATA[
+        DELETE FROM ex_student 
+    ]]>
+     <include refid="selectExStudent_where" />
+	</delete>
+
+	<select id="selectByIdExStudent" resultMap="ExStudentResult">
+		SELECT
+		<include refid="ExStudent_columns" />
+	    <![CDATA[
+	        FROM ex_student 
+	        WHERE 
+		        stu_id_ = #{stuId} 
+	    ]]>
+	</select>
+
+	<sql id="selectExStudent_where">
+		<where>
+			
+			<if test="stuId != null and stuId != ''">
+				and stu_id_ = #{stuId}
+			</if>
+			
+			<if test="name != null and name != ''">
+				and name_ = #{name}
+			</if>
+			<if test="birthdayBegin != null">
+				and birthday_ >= #{birthdayBegin}
+			</if>
+			<if test="birthdayEnd != null">
+				and birthday_ &lt;= #{birthdayEnd}
+			</if>
+			
+			<if test="sex != null and sex != ''">
+				and sex_ = #{sex}
+			</if>
+			
+			<if test="desc != null and desc != ''">
+				and desc_ = #{desc}
+			</if>
+		</where>
+	</sql>
+
+	<select id="select_ExStudentsCount" resultType="long">
+		SELECT count(*) FROM ex_student
+		<include refid="selectExStudent_where" />
+	</select>
+
+	<!-- 分页查询已经使用Dialect进行分页,也可以不使用Dialect直接编写分页 因为分页查询将传 #offset#,#pageSize#,#lastRows# 
+		三个参数,不同的数据库可以根于此三个参数属性应用不同的分页实现 -->
+	<select id="selectPage_ExStudents" resultMap="ExStudentResult">
+		SELECT
+		<include refid="ExStudent_columns" />
+		FROM ex_student
+		<include refid="selectExStudent_where" />
+	</select>
+
+	<select id="findByPKId" parameterType="String" resultMap="ExStudentResult">
+		SELECT
+		<include refid="ExStudent_columns" />
+		 FROM ex_student
+		WHERE 
+		        stu_id_ = #{pk_Id} 
+	</select>
+	
+	
+	<select id="findListByObj" resultMap="ExStudentResult">
+		SELECT
+		<include refid="ExStudent_columns" />
+		FROM ex_student
+		<include refid="selectExStudent_where" />
+	</select>
+</mapper>
+
